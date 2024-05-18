@@ -6,9 +6,10 @@ class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True)
     full_name = models.CharField(unique=True, max_length=100)
-    
+
     # OTP-код (one-time password) это одноразовый пароль, который 
     # генерируют защищённые аппаратные устройства или программы
+    # https://habr.com/ru/companies/vk/articles/741720/
     otp = models.CharField(max_length=100, null=True, blank=True)   
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)
 

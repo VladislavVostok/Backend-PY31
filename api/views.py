@@ -26,6 +26,12 @@ from distutils.util import strtobool
 import random
 from decimal import Decimal
 
+
+
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = api_serializer.MyTokenObtainPairSerializer
 
@@ -114,6 +120,7 @@ class CategoryListAPIView(generics.ListAPIView):
     queryset = api_models.Category.objects.filter(active=True)  
     serializer_class = api_serializer.CategorySerializer
     permission_classes = [AllowAny]
+
 
 class CourseListAPIView(generics.ListAPIView):
     queryset = api_models.Course.objects.filter(platform_status="Published", teacher_course_status="Published")

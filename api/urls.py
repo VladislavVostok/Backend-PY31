@@ -4,13 +4,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
 
-
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
     path("user/register/", api_views.RegisterView.as_view()),
-    # path("user/token/refresh/", api_views.Ap.as_view()),
-
-
-
+    path("user/token/refresh/", TokenRefreshView.as_view()),
 
      # Core Endpoints
     path("course/category/", api_views.CategoryListAPIView.as_view()),

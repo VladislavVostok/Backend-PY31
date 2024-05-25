@@ -8,9 +8,9 @@ from django.db.models.functions import ExtractMonth
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
-from api import serializers as api_serializer
+from api import serializer as api_serializer
 from api import models as api_models
-from users.models import User, Profile
+from userauths.models import User, Profile
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, viewsets
@@ -19,17 +19,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-import requests
-from datetime import datetime, timedelta
-from distutils.util import strtobool
 
 import random
 from decimal import Decimal
-
-
-
-from django.views.decorators.csrf import ensure_csrf_cookie
-
+import requests
+from datetime import datetime, timedelta
+from distutils.util import strtobool
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -41,7 +36,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = api_serializer.RegisterSerializer
 
 def generate_random_otp(length=7):
-    otp = ''.join([str(random.randint(0,9)) for _ in range(length)])
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
     return otp
 
 class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
@@ -49,8 +44,9 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.UserSerializer
 
     def get_object(self):
-        email = self.kwargs['email']        #api/v1/password-email-verify/vladislav.sage@yandex.ru/
-        user = User.objects.get(email=email)
+        email = self.kwargs['email']
+        user = User.objects.filter(email=email).first()
+
         if user:
             uuidb64 = user.pk
             refresh = RefreshToken.for_user(user)
@@ -60,11 +56,33 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             user.otp = generate_random_otp()
             user.save()
 
-            link = f"http://localhost:8000/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
-
-            print(f"link = {link}")
+            link = f"http://localhost:5173/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
 
 
+
+            # TODO Донастроить отправку Email
+            # context = {
+            #     "link": link,
+            #     "username": user.username
+            # }
+
+            # subject = "Password Rest Email"
+            # text_body = render_to_string("email/password_reset.txt", context)
+            # html_body = render_to_string("email/password_reset.html", context)
+
+            # msg = EmailMultiAlternatives(
+            #     subject=subject,
+            #     from_email=settings.FROM_EMAIL,
+            #     to=[user.email],
+            #     body=text_body
+            # )
+
+            # msg.attach_alternative(html_body, "text/html")
+            # msg.send()
+
+            print("link ======", link)
+        return user
+    
 class PasswordChangeAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = api_serializer.UserSerializer
@@ -83,7 +101,6 @@ class PasswordChangeAPIView(generics.CreateAPIView):
             return Response({"message": "Password Changed Successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "User Does Not Exists"}, status=status.HTTP_404_NOT_FOUND)
-
 
 class ChangePasswordAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.UserSerializer
@@ -105,7 +122,7 @@ class ChangePasswordAPIView(generics.CreateAPIView):
         else:
             return Response({"message": "User does not exists", "icon": "error"})
 
-
+                
 
 class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = api_serializer.ProfileSerializer
@@ -120,7 +137,6 @@ class CategoryListAPIView(generics.ListAPIView):
     queryset = api_models.Category.objects.filter(active=True)  
     serializer_class = api_serializer.CategorySerializer
     permission_classes = [AllowAny]
-
 
 class CourseListAPIView(generics.ListAPIView):
     queryset = api_models.Course.objects.filter(platform_status="Published", teacher_course_status="Published")
@@ -365,18 +381,16 @@ class CouponApplyAPIView(generics.CreateAPIView):
 
 
 
-## TODO Придумать  заглушку для оплаты
-
+# TODO Прикрутить оплату.
+            
 class SearchCourseAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         query = self.request.GET.get('query')
-        # learn lms
         return api_models.Course.objects.filter(title__icontains=query, platform_status="Published", teacher_course_status="Published")
-
-
+    
 
 class StudentSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.StudentSummarySerializer
@@ -1007,8 +1021,8 @@ class CourseDetailAPIView(generics.RetrieveDestroyAPIView):
     permission_classes = [AllowAny]
 
     def get_object(self):
-        course_id = self.kwargs['course_id']
-        return api_models.Course.objects.get(course_id=course_id)
+        slug = self.kwargs['slug']
+        return api_models.Course.objects.get(slug=slug)
 
 
 class CourseVariantDeleteAPIView(generics.DestroyAPIView):

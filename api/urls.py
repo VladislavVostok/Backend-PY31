@@ -1,14 +1,20 @@
 from api import views as api_views
 from django.urls import path
+
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
+    # Authentication Endpoints
 
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
-    path("user/register/", api_views.RegisterView.as_view()),
     path("user/token/refresh/", TokenRefreshView.as_view()),
+    path("user/register/", api_views.RegisterView.as_view()),
+    path("user/password-reset/<email>/", api_views.PasswordResetEmailVerifyAPIView.as_view()),
+    path("user/password-change/", api_views.PasswordChangeAPIView.as_view()),
+    path("user/profile/<user_id>/", api_views.ProfileAPIView.as_view()),
+    path("user/change-password/", api_views.ChangePasswordAPIView.as_view()),
 
-     # Core Endpoints
+    # Core Endpoints
     path("course/category/", api_views.CategoryListAPIView.as_view()),
     path("course/course-list/", api_views.CourseListAPIView.as_view()),
     path("course/search/", api_views.SearchCourseAPIView.as_view()),
@@ -20,6 +26,7 @@ urlpatterns = [
     path("order/create-order/", api_views.CreateOrderAPIView.as_view()),
     path("order/checkout/<oid>/", api_views.CheckoutAPIView.as_view()),
     path("order/coupon/", api_views.CouponApplyAPIView.as_view()),
+
 
     # Student API Endpoints
     path("student/summary/<user_id>/", api_views.StudentSummaryAPIView.as_view()),
@@ -33,6 +40,7 @@ urlpatterns = [
     path("student/wishlist/<user_id>/", api_views.StudentWishListListCreateAPIView.as_view()),
     path("student/question-answer-list-create/<course_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
     path("student/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
+
 
     # Teacher Routes
     path("teacher/summary/<teacher_id>/", api_views.TeacherSummaryAPIView.as_view()),
@@ -53,4 +61,7 @@ urlpatterns = [
     path("teacher/course-detail/<course_id>/", api_views.CourseDetailAPIView.as_view()),
     path("teacher/course/variant-delete/<variant_id>/<teacher_id>/<course_id>/", api_views.CourseVariantDeleteAPIView.as_view()),
     path("teacher/course/variant-item-delete/<variant_id>/<variant_item_id>/<teacher_id>/<course_id>/", api_views.CourseVariantItemDeleteAPIVIew.as_view()),
+
 ]
+
+
